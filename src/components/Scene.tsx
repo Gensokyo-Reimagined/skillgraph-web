@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, TransformControls } from '@react-three/drei';
-import { useGraphStore } from '../store/useGraphStore';
+import { useGraphStore, type NodeData } from '../store/useGraphStore';
 import { useStore } from 'zustand';
 import { nodeRefs } from '../store/nodeRefs';
 import { Node } from './Node';
@@ -32,14 +32,58 @@ const SceneContent: React.FC = () => {
         }
     }, [selection, nodes]); // Depend on nodes to re-attach if nodes regenerate
 
-    // Delete Key Handler
+    // Delete Key and Copy/Paste Handler
     useEffect(() => {
+        // Local clipboard state (closure)
+        let clipboard: NodeData[] = [];
+
         const handleKeyDown = (e: KeyboardEvent) => {
+            const state = useGraphStore.getState();
+
+            // Delete
             if (e.key === 'Delete') {
-                const state = useGraphStore.getState();
                 state.selection.forEach(id => {
                     state.removeNode(id);
                 });
+            }
+
+            // Copy (Ctrl+C)
+            if (e.ctrlKey && e.key === 'c') {
+                const selectedNodes = state.nodes.filter(n => state.selection.includes(n.id));
+                if (selectedNodes.length > 0) {
+                    // Deep copy
+                    clipboard = JSON.parse(JSON.stringify(selectedNodes));
+                    console.log('Copied nodes:', clipboard.length);
+                }
+            }
+
+            // Paste (Ctrl+V)
+            if (e.ctrlKey && e.key === 'v') {
+                if (clipboard.length > 0) {
+                    // Create mapping from old ID to new ID
+                    const idMap: Record<string, string> = {};
+                    clipboard.forEach(node => {
+                        idMap[node.id] = "node_" + Math.floor(Math.random() * 1000000);
+                    });
+
+                    // Create new nodes with mapped IDs and relationships
+                    const newNodes = clipboard.map(node => {
+                        const newId = idMap[node.id];
+                        return {
+                            ...node,
+                            id: newId,
+                            x: node.x + 1,
+                            z: node.z + 1,
+                            // Map relationships
+                            requires: node.requires.map((reqId: string) => idMap[reqId] || reqId),
+                            orRequires: node.orRequires.map((reqId: string) => idMap[reqId] || reqId),
+                            conflicts: node.conflicts.map((reqId: string) => idMap[reqId] || reqId),
+                        };
+                    });
+
+                    state.addNodes(newNodes);
+                    console.log('Pasted nodes:', newNodes.length);
+                }
             }
         };
 

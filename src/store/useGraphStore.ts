@@ -40,6 +40,7 @@ interface GraphState {
 
     // Actions
     addNode: () => void;
+    addNodes: (nodes: NodeData[]) => void;
     updateNode: (id: string, data: Partial<NodeData>) => void;
     updateNodeId: (oldId: string, newId: string) => boolean;
     removeNode: (id: string) => void;
@@ -89,6 +90,11 @@ export const useGraphStore = create<GraphState>()(
                         selection: [id] // Select new node
                     };
                 }),
+
+                addNodes: (newNodes) => set((state) => ({
+                    nodes: [...state.nodes, ...newNodes],
+                    selection: newNodes.map(n => n.id)
+                })),
 
                 updateNode: (id, data) => {
                     set((state) => ({
