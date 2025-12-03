@@ -32,6 +32,21 @@ const SceneContent: React.FC = () => {
         }
     }, [selection, nodes]); // Depend on nodes to re-attach if nodes regenerate
 
+    // Delete Key Handler
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Delete') {
+                const state = useGraphStore.getState();
+                state.selection.forEach(id => {
+                    state.removeNode(id);
+                });
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
     return (
         <>
             <ambientLight intensity={0.6} />
@@ -43,9 +58,9 @@ const SceneContent: React.FC = () => {
                 ref={orbitRef}
                 makeDefault
                 mouseButtons={{
-                    LEFT: THREE.MOUSE.PAN,
+                    LEFT: THREE.MOUSE.ROTATE,
                     MIDDLE: THREE.MOUSE.DOLLY,
-                    RIGHT: THREE.MOUSE.ROTATE
+                    RIGHT: THREE.MOUSE.PAN
                 }}
             />
 
