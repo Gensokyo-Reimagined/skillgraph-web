@@ -38,6 +38,12 @@ const SceneContent: React.FC = () => {
         let clipboard: NodeData[] = [];
 
         const handleKeyDown = (e: KeyboardEvent) => {
+            // Ignore if typing in an input
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+                return;
+            }
+
             const state = useGraphStore.getState();
 
             // Delete
