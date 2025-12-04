@@ -274,6 +274,34 @@ export const Sidebar: React.FC = () => {
                     </div>
                 ))}
 
+                {/* Items */}
+                <div className="border-b border-[#444] mb-4 pb-1 text-white font-bold">Items</div>
+                {['activatedItem', 'deactivatedItem', 'activatableItem'].map((itemType) => {
+                    const item = (selectedNode as any)[itemType] || { id: "minecraft:air", count: 0 };
+                    return (
+                        <div key={itemType} className="mb-4">
+                            <label className="block text-xs text-gray-400 mb-1 capitalize">{itemType.replace(/([A-Z])/g, ' $1').trim()}</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                <div className="col-span-2">
+                                    <BufferedInput
+                                        value={item.id}
+                                        onChange={(val) => updateNode(selectedNode.id, { [itemType]: { ...item, id: val } })}
+                                        className="w-full bg-[#2a2a2a] border border-[#444] text-white p-2 rounded text-sm focus:outline-none focus:border-indigo-500"
+                                    />
+                                </div>
+                                <div>
+                                    <BufferedInput
+                                        type="number"
+                                        value={item.count}
+                                        onChange={(val) => updateNode(selectedNode.id, { [itemType]: { ...item, count: parseInt(val) } })}
+                                        className="w-full bg-[#2a2a2a] border border-[#444] text-white p-2 rounded text-sm focus:outline-none focus:border-indigo-500"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+
                 {/* Changes */}
                 <div className="border-b border-[#444] mb-4 pb-1 text-white font-bold">Changes / Rewards</div>
                 <div className="space-y-2 mb-4">

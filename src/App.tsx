@@ -165,6 +165,7 @@ function App() {
           acc[node.id] = node;
           return acc;
         }, {} as Record<string, any>)}
+        onUpdate={(data) => importGraph(data)}
       />
 
 

@@ -26,6 +26,9 @@ export interface NodeData {
     requires: string[];
     orRequires: string[];
     conflicts: string[];
+    activatedItem?: { id: string; count: number };
+    deactivatedItem?: { id: string; count: number };
+    activatableItem?: { id: string; count: number };
     changes: ChangeData[];
 }
 
@@ -90,7 +93,10 @@ export const useGraphStore = create<GraphState>()(
                             requires: [],
                             orRequires: [],
                             conflicts: [],
-                            changes: []
+                            changes: [],
+                            activatedItem: { id: "minecraft:iron_block", count: 1 },
+                            deactivatedItem: { id: "minecraft:redstone_block", count: 1 },
+                            activatableItem: { id: "minecraft:netherrack", count: 1 }
                         }],
                         selection: [id] // Select new node
                     };
@@ -225,10 +231,18 @@ export const useGraphStore = create<GraphState>()(
                             requires: d.requires || [],
                             orRequires: d.orRequires || [],
                             conflicts: d.conflicts || [],
-                            changes: d.changes || []
+                            changes: d.changes || [],
+                            activatedItem: d.activatedItem || { id: "minecraft:iron_block", count: 1 },
+                            deactivatedItem: d.deactivatedItem || { id: "minecraft:redstone_block", count: 1 },
+                            activatableItem: d.activatableItem || { id: "minecraft:netherrack", count: 1 }
                         });
                     }
-                    set({ nodes: newNodes, selection: [] });
+
+                    // Preserve selection if nodes still exist
+                    const currentSelection = get().selection;
+                    const validSelection = currentSelection.filter(id => newNodes.some(n => n.id === id));
+
+                    set({ nodes: newNodes, selection: validSelection });
                 },
 
                 focusTrigger: 0,

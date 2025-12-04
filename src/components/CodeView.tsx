@@ -5,19 +5,38 @@ interface CodeViewProps {
     isOpen: boolean;
     onClose: () => void;
     data: Record<string, any>;
+    onUpdate: (data: Record<string, any>) => void;
 }
 
-export const CodeView: React.FC<CodeViewProps> = ({ isOpen, onClose, data }) => {
+export const CodeView: React.FC<CodeViewProps> = ({ isOpen, onClose, data, onUpdate }) => {
     const [copied, setCopied] = useState(false);
+    const [jsonString, setJsonString] = useState('');
+    const [error, setError] = useState<string | null>(null);
+
+    // Initialize state when data changes or modal opens
+    React.useEffect(() => {
+        if (isOpen) {
+            setJsonString(JSON.stringify(data, null, 2));
+            setError(null);
+        }
+    }, [isOpen, data]);
 
     if (!isOpen) return null;
-
-    const jsonString = JSON.stringify(data, null, 2);
 
     const handleCopy = () => {
         navigator.clipboard.writeText(jsonString);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleUpdate = () => {
+        try {
+            const parsed = JSON.parse(jsonString);
+            onUpdate(parsed);
+            onClose();
+        } catch (e) {
+            setError((e as Error).message);
+        }
     };
 
     return (
@@ -32,22 +51,41 @@ export const CodeView: React.FC<CodeViewProps> = ({ isOpen, onClose, data }) => 
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-auto p-4 bg-[#111] custom-scrollbar">
-                    <pre className="text-sm font-mono text-green-400 whitespace-pre-wrap break-all">
-                        {jsonString}
-                    </pre>
+                <div className="flex-1 p-4 bg-[#111] flex flex-col gap-2">
+                    {error && (
+                        <div className="bg-red-900/50 border border-red-500 text-red-200 p-2 rounded text-sm">
+                            Invalid JSON: {error}
+                        </div>
+                    )}
+                    <textarea
+                        value={jsonString}
+                        onChange={(e) => setJsonString(e.target.value)}
+                        className="flex-1 w-full bg-[#111] text-green-400 font-mono text-sm p-2 resize-none focus:outline-none custom-scrollbar"
+                        spellCheck={false}
+                    />
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-[#444] flex justify-end">
-                    <button
-                        onClick={handleCopy}
-                        className={`flex items-center gap-2 px-4 py-2 rounded font-medium transition-colors ${copied ? 'bg-green-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'
-                            }`}
-                    >
-                        {copied ? <Check size={18} /> : <Copy size={18} />}
-                        {copied ? 'Copied!' : 'Copy to Clipboard'}
-                    </button>
+                <div className="p-4 border-t border-[#444] flex justify-between items-center">
+                    <div className="text-xs text-gray-500">
+                        Edit the JSON and click Update to apply changes.
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleCopy}
+                            className={`flex items-center gap-2 px-4 py-2 rounded font-medium transition-colors ${copied ? 'bg-green-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-white'
+                                }`}
+                        >
+                            {copied ? <Check size={18} /> : <Copy size={18} />}
+                            {copied ? 'Copied!' : 'Copy'}
+                        </button>
+                        <button
+                            onClick={handleUpdate}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-medium transition-colors"
+                        >
+                            Update Graph
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
