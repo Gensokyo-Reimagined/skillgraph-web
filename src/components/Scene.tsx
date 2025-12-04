@@ -97,6 +97,57 @@ const SceneContent: React.FC = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
+    // Focus Logic
+    const focusTrigger = useGraphStore(state => state.focusTrigger);
+    const prevTriggerRef = useRef(focusTrigger);
+
+    const handleFocus = () => {
+        const state = useGraphStore.getState();
+        const lastSelected = state.selection[state.selection.length - 1];
+        if (!lastSelected) return;
+
+        const node = state.nodes.find(n => n.id === lastSelected);
+        if (!node || !orbitRef.current) return;
+
+        // Animate camera and target
+        const targetPos = new THREE.Vector3(node.x, node.y, node.z);
+        const cameraOffset = new THREE.Vector3(0, 5, 10); // Offset from node
+        const newCameraPos = targetPos.clone().add(cameraOffset);
+
+        // We can't easily tween without a library or custom frame loop here for now.
+        // For MVP, we'll just set it.
+        // Ideally we would use GSAP or similar, but let's try a simple lerp in useFrame if we want smooth,
+        // or just direct set for now as per plan.
+
+        // Direct set for responsiveness
+        orbitRef.current.target.copy(targetPos);
+        orbitRef.current.object.position.copy(newCameraPos);
+        orbitRef.current.update();
+    };
+
+    // Trigger on store signal
+    useEffect(() => {
+        if (focusTrigger !== prevTriggerRef.current) {
+            handleFocus();
+            prevTriggerRef.current = focusTrigger;
+        }
+    }, [focusTrigger]);
+
+    // Trigger on 'F' key
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key.toLowerCase() === 'f') {
+                // Check if we are not in an input
+                const target = e.target as HTMLElement;
+                if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') return;
+
+                handleFocus();
+            }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, []);
+
     return (
         <>
             <ambientLight intensity={0.6} />
@@ -115,19 +166,36 @@ const SceneContent: React.FC = () => {
             />
 
             {/* Render Connections */}
-            {nodes.map(node => (
-                <group key={`connections-${node.id}`}>
-                    {node.requires.map(targetId => (
-                        <Connection key={`${node.id}-req-${targetId}`} fromId={node.id} toId={targetId} type="requires" />
-                    ))}
-                    {node.orRequires.map(targetId => (
-                        <Connection key={`${node.id}-or-${targetId}`} fromId={node.id} toId={targetId} type="orRequires" />
-                    ))}
-                    {node.conflicts.map(targetId => (
-                        <Connection key={`${node.id}-con-${targetId}`} fromId={node.id} toId={targetId} type="conflicts" />
-                    ))}
-                </group>
-            ))}
+            {/* Render Connections */}
+            {nodes.map(node => {
+                // Refined logic:
+                // Iterate over connections and decide for each one.
+                return (
+                    <group key={`connections-${node.id}`}>
+                        {node.requires.map(targetId => {
+                            const isVisible = !useGraphStore.getState().options.showSelectedLinesOnly ||
+                                selection.includes(node.id) ||
+                                selection.includes(targetId);
+                            if (!isVisible) return null;
+                            return <Connection key={`${node.id}-req-${targetId}`} fromId={node.id} toId={targetId} type="requires" />;
+                        })}
+                        {node.orRequires.map(targetId => {
+                            const isVisible = !useGraphStore.getState().options.showSelectedLinesOnly ||
+                                selection.includes(node.id) ||
+                                selection.includes(targetId);
+                            if (!isVisible) return null;
+                            return <Connection key={`${node.id}-or-${targetId}`} fromId={node.id} toId={targetId} type="orRequires" />;
+                        })}
+                        {node.conflicts.map(targetId => {
+                            const isVisible = !useGraphStore.getState().options.showSelectedLinesOnly ||
+                                selection.includes(node.id) ||
+                                selection.includes(targetId);
+                            if (!isVisible) return null;
+                            return <Connection key={`${node.id}-con-${targetId}`} fromId={node.id} toId={targetId} type="conflicts" />;
+                        })}
+                    </group>
+                );
+            })}
 
             {/* Render Nodes */}
             {nodes.map((node) => (

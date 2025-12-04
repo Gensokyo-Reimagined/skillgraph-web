@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Scene } from './components/Scene';
 import { Sidebar } from './components/Sidebar';
 import { useGraphStore } from './store/useGraphStore';
-import { Undo2, Redo2, Plus, Download, Upload, Code } from 'lucide-react';
+import { Undo2, Redo2, Plus, Download, Upload, Code, Focus } from 'lucide-react';
 import { CodeView } from './components/CodeView';
 
 function App() {
@@ -107,6 +107,21 @@ function App() {
             className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors ${options.showNames ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
           >
             Names
+          </button>
+
+          <button
+            onClick={() => toggleOption('showSelectedLinesOnly')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors ${options.showSelectedLinesOnly ? 'bg-orange-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+          >
+            Lines
+          </button>
+
+          <button
+            onClick={() => useGraphStore.getState().triggerFocus()}
+            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-400 hover:text-white"
+            title="Focus Selected Node (F)"
+          >
+            <Focus className="w-4 h-4" /> Focus
           </button>
         </div>
 

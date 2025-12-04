@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useLayoutEffect } from 'react';
-import { Text } from '@react-three/drei';
+import { Text, Billboard } from '@react-three/drei';
 import { useGraphStore, type NodeData } from '../store/useGraphStore';
 import { nodeRefs } from '../store/nodeRefs';
 import * as THREE from 'three';
@@ -80,17 +80,43 @@ export const Node: React.FC<NodeData> = (props) => {
             )}
 
             {options.showNames && (
-                <Text
+                <Billboard
                     position={[0, radius + 0.5, 0]}
-                    fontSize={0.5}
-                    color="white"
-                    anchorX="center"
-                    anchorY="middle"
-                    outlineWidth={0.05}
-                    outlineColor="#000000"
+                    follow={true}
+                    lockX={false}
+                    lockY={false}
+                    lockZ={false}
                 >
-                    {displayName}
-                </Text>
+                    <Text
+                        fontSize={0.5}
+                        color="white"
+                        anchorX="center"
+                        anchorY="middle"
+                        outlineWidth={0.05}
+                        outlineColor="#000000"
+                    >
+                        {displayName}
+                    </Text>
+                    {isSelected && props.changes && props.changes.length > 0 && (
+                        <Text
+                            position={[0, -0.6, 0]}
+                            fontSize={0.3}
+                            color="#fbbf24" // Amber-400
+                            anchorX="center"
+                            anchorY="top"
+                            outlineWidth={0.02}
+                            outlineColor="#000000"
+                        >
+                            {props.changes.map(c => {
+                                if (c.type === 'STAT_CHANGE') {
+                                    return `${c.statType}: ${c.statModifierType === 'ADDITIVE' ? '+' : ''}${c.value}`;
+                                } else {
+                                    return `${c.id} (Lvl ${c.level})`;
+                                }
+                            }).join('\n')}
+                        </Text>
+                    )}
+                </Billboard>
             )}
         </group>
     );

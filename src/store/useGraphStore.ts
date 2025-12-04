@@ -36,6 +36,7 @@ interface GraphState {
         snap: boolean;
         glow: boolean;
         showNames: boolean;
+        showSelectedLinesOnly: boolean;
     };
 
     // Actions
@@ -58,6 +59,9 @@ interface GraphState {
 
     toggleOption: (key: keyof GraphState['options']) => void;
     importGraph: (data: Record<string, any>) => void;
+
+    focusTrigger: number;
+    triggerFocus: () => void;
 }
 
 export const useGraphStore = create<GraphState>()(
@@ -70,6 +74,7 @@ export const useGraphStore = create<GraphState>()(
                     snap: false,
                     glow: true,
                     showNames: true,
+                    showSelectedLinesOnly: false,
                 },
 
                 addNode: () => set((state) => {
@@ -224,12 +229,15 @@ export const useGraphStore = create<GraphState>()(
                         });
                     }
                     set({ nodes: newNodes, selection: [] });
-                }
+                },
+
+                focusTrigger: 0,
+                triggerFocus: () => set((state) => ({ focusTrigger: state.focusTrigger + 1 })),
             }),
             {
                 // Persist Options
                 name: 'skillgraph-storage',
-                version: 6, // Bump version
+                version: 8, // Bump version
                 partialize: (state) => ({
                     nodes: state.nodes,
                     options: state.options
