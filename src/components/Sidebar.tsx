@@ -48,6 +48,48 @@ const BufferedInput = ({
     );
 };
 
+const STATS = [
+    "ATTACK_DAMAGE",
+    "ATTACK_SPEED",
+    "BONUS_DAMAGE",
+    "CRITICAL_STRIKE_CHANCE",
+    "CRITICAL_STRIKE_DAMAGE",
+    "CRITICAL_STRIKE_RESILIENCE",
+    "DAMAGE_REDUCTION",
+    "DEFENSE",
+    "DODGE_CHANCE",
+    "DODGE_NEGATION",
+    "HEALTH",
+    "HEALTH_REGENERATION",
+    "LIFESTEAL_CHANCE",
+    "LIFESTEAL_POWER",
+    "MOVEMENT_SPEED",
+    "PARRY_CHANCE",
+    "PARRY_COUNTERATTACK",
+    "PARRY_POWER",
+    "PARRY_NEGATION",
+    "SCALE",
+    "STEP_HEIGHT",
+    "ARMOR",
+    "ARMOR_TOUGHNESS",
+    "BURNING_TIME",
+    "EXPLOSION_KNOCKBACK_RESISTANCE",
+    "FALL_DAMAGE_MULTIPLIER",
+    "GRAVITY",
+    "JUMP_STRENGTH",
+    "KNOCKBACK_RESISTANCE",
+    "MOVEMENT_EFFICIENCY",
+    "OXYGEN_BONUS",
+    "SAFE_FALL_DISTANCE",
+    "SNEAKING_SPEED",
+    "WATER_MOVEMENT_EFFICIENCY",
+    "BLOCK_BREAK_SPEED",
+    "BLOCK_INTERACTION_RANGE",
+    "ENTITY_INTERACTION_RANGE",
+    "FLYING_SPEED",
+    "FOLLOW_RANGE"
+];
+
 export const Sidebar: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false);
     const {
@@ -246,11 +288,17 @@ export const Sidebar: React.FC = () => {
                                 <div className="grid grid-cols-2 gap-2 text-xs">
                                     <div>
                                         <label className="block text-gray-500">Stat Type</label>
-                                        <BufferedInput
+                                        <input
+                                            list="stats-list"
                                             value={change.statType || ''}
-                                            onChange={(val) => updateChange(selectedNode.id, idx, { statType: val })}
+                                            onChange={(e) => updateChange(selectedNode.id, idx, { statType: e.target.value })}
                                             className="w-full bg-[#1a1a1a] border border-[#444] text-white p-1 rounded"
                                         />
+                                        <datalist id="stats-list">
+                                            {STATS.map(stat => (
+                                                <option key={stat} value={stat} />
+                                            ))}
+                                        </datalist>
                                     </div>
                                     <div>
                                         <label className="block text-gray-500">Value</label>
