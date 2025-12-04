@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Scene } from './components/Scene';
 import { Sidebar } from './components/Sidebar';
 import { useGraphStore } from './store/useGraphStore';
-import { Undo2, Redo2, Plus, Download, Upload } from 'lucide-react';
+import { Undo2, Redo2, Plus, Download, Upload, Code } from 'lucide-react';
+import { CodeView } from './components/CodeView';
 
 function App() {
   const {
@@ -12,6 +13,8 @@ function App() {
     options,
     toggleOption
   } = useGraphStore();
+
+  const [showCodeView, setShowCodeView] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -107,7 +110,16 @@ function App() {
           </button>
         </div>
 
+
+
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowCodeView(true)}
+            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded text-sm font-medium transition-colors"
+          >
+            <Code className="w-4 h-4" /> Code
+          </button>
+          <div className="h-6 w-px bg-gray-700 mx-2" />
           <input
             type="file"
             ref={fileInputRef}
@@ -131,6 +143,14 @@ function App() {
       </div>
       <Scene />
       <Sidebar />
+      <CodeView
+        isOpen={showCodeView}
+        onClose={() => setShowCodeView(false)}
+        data={nodes.reduce((acc, node) => {
+          acc[node.id] = node;
+          return acc;
+        }, {} as Record<string, any>)}
+      />
 
 
       {/* Legend */}
@@ -145,7 +165,7 @@ function App() {
           <div className="w-3 h-3 rounded-full bg-[#ff0000]"></div> Conflicts
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 
