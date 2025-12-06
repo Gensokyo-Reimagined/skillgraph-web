@@ -41,6 +41,11 @@ interface GraphState {
         showNames: boolean;
         showSelectedLinesOnly: boolean;
     };
+    pickingMode: {
+        isActive: boolean;
+        type: 'requires' | 'orRequires' | 'conflicts' | null;
+        sourceId: string | null;
+    };
 
     // Actions
     addNode: () => void;
@@ -65,6 +70,9 @@ interface GraphState {
 
     focusTrigger: number;
     triggerFocus: () => void;
+
+    startPicking: (sourceId: string, type: 'requires' | 'orRequires' | 'conflicts') => void;
+    stopPicking: () => void;
 }
 
 export const useGraphStore = create<GraphState>()(
@@ -78,6 +86,11 @@ export const useGraphStore = create<GraphState>()(
                     glow: true,
                     showNames: true,
                     showSelectedLinesOnly: false,
+                },
+                pickingMode: {
+                    isActive: false,
+                    type: null,
+                    sourceId: null
                 },
 
                 addNode: () => set((state) => {
@@ -247,6 +260,14 @@ export const useGraphStore = create<GraphState>()(
 
                 focusTrigger: 0,
                 triggerFocus: () => set((state) => ({ focusTrigger: state.focusTrigger + 1 })),
+
+                startPicking: (sourceId, type) => set({
+                    pickingMode: { isActive: true, sourceId, type }
+                }),
+
+                stopPicking: () => set({
+                    pickingMode: { isActive: false, sourceId: null, type: null }
+                }),
             }),
             {
                 // Persist Options

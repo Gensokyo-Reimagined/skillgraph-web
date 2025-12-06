@@ -9,7 +9,9 @@ export const Node: React.FC<NodeData> = (props) => {
     const {
         selectNode,
         selection,
-        options
+        options,
+        pickingMode,
+        addRelationship
     } = useGraphStore();
 
     const groupRef = useRef<THREE.Group>(null);
@@ -53,7 +55,15 @@ export const Node: React.FC<NodeData> = (props) => {
             position={[x, y, z]}
             onClick={(e) => {
                 e.stopPropagation();
-                selectNode(id, e.shiftKey);
+                if (pickingMode.isActive && pickingMode.sourceId && pickingMode.type) {
+                    // Prevent picking itself
+                    if (pickingMode.sourceId !== id) {
+                        addRelationship(pickingMode.sourceId, id, pickingMode.type);
+                        // stopPicking(); // Keep picking mode active
+                    }
+                } else {
+                    selectNode(id, e.shiftKey);
+                }
             }}
         >
             <mesh>

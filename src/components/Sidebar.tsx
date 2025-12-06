@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGraphStore } from '../store/useGraphStore';
-import { ChevronRight, ChevronLeft, Trash2 } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Trash2, MousePointer, X } from 'lucide-react';
 import clsx from 'clsx';
 
 // Helper component for buffered inputs (commits on blur/enter)
@@ -102,7 +102,10 @@ export const Sidebar: React.FC = () => {
         removeRelationship,
         addChange,
         updateChange,
-        removeChange
+        removeChange,
+        pickingMode,
+        startPicking,
+        stopPicking
     } = useGraphStore();
 
     // Determine what to show based on selection
@@ -124,6 +127,26 @@ export const Sidebar: React.FC = () => {
 
     // Render Content
     const renderContent = () => {
+        if (pickingMode.isActive) {
+            return (
+                <div className="p-4 flex flex-col h-full">
+                    <div className="bg-indigo-900/50 border border-indigo-500 p-4 rounded mb-4 text-center">
+                        <MousePointer className="mx-auto mb-2 text-indigo-400" size={24} />
+                        <h3 className="text-white font-bold mb-1">Picking Mode</h3>
+                        <p className="text-sm text-gray-300 mb-4">
+                            Click a node in the 3D view to add it to <span className="font-bold text-white">{pickingMode.type}</span>.
+                        </p>
+                        <button
+                            onClick={stopPicking}
+                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded flex items-center justify-center gap-2 w-full"
+                        >
+                            <X size={16} /> Cancel
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
         if (selection.length === 0) {
             return <div className="text-gray-500 text-center mt-10">Select a node to edit</div>;
         }
@@ -267,8 +290,21 @@ export const Sidebar: React.FC = () => {
                                     }
                                 }}
                                 className="bg-[#4b5563] hover:bg-[#374151] text-white px-3 rounded"
+                                title="Add Selected from Dropdown"
                             >
                                 +
+                            </button>
+                            <button
+                                onClick={() => startPicking(selectedNode.id, type as any)}
+                                className={clsx(
+                                    "px-3 rounded text-white",
+                                    pickingMode.isActive && pickingMode.type === type
+                                        ? "bg-indigo-600 animate-pulse"
+                                        : "bg-[#4b5563] hover:bg-[#374151]"
+                                )}
+                                title="Pick from 3D View"
+                            >
+                                <MousePointer size={14} />
                             </button>
                         </div>
                     </div>
