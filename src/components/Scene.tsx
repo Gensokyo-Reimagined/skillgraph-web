@@ -153,7 +153,7 @@ const SceneContent: React.FC = () => {
             <ambientLight intensity={0.6} />
             <directionalLight position={[10, 20, 10]} intensity={0.8} />
 
-            <Grid infiniteGrid fadeDistance={50} sectionColor="#444" cellColor="#222" />
+            <Grid infiniteGrid fadeDistance={50} sectionColor="#444" cellColor="#222" raycast={() => null} />
 
             <OrbitControls
                 ref={orbitRef}

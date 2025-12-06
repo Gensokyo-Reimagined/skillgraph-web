@@ -110,7 +110,7 @@ export const Sidebar: React.FC = () => {
 
     // Determine what to show based on selection
     const primaryId = selection.length > 0 ? selection[selection.length - 1] : null;
-    const selectedNode = nodes.find(n => n.id === primaryId);
+    const selectedNode = primaryId ? nodes.find(n => n.id === primaryId) : undefined;
 
     // Helper to handle color picker
     const handleColorPick = (hex: string) => {
@@ -274,7 +274,7 @@ export const Sidebar: React.FC = () => {
                         <div className="flex gap-1">
                             <select
                                 id={`add-${type}`}
-                                className="flex-1 bg-[#2a2a2a] border border-[#444] text-white p-1 rounded text-sm"
+                                className="flex-1 min-w-0 bg-[#2a2a2a] border border-[#444] text-white p-1 rounded text-sm"
                             >
                                 <option value="">Select Node...</option>
                                 {nodes.filter(n => n.id !== selectedNode.id).map(n => (
