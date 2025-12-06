@@ -267,6 +267,13 @@ export const Scene: React.FC = () => {
         <Canvas
             camera={{ position: [10, 10, 10], fov: 75 }}
             className="w-full h-full bg-[#111]"
+            onPointerMissed={() => {
+                const state = useGraphStore.getState();
+                // Only deselect if we are NOT in picking mode
+                if (!state.pickingMode.isActive) {
+                    state.selectNode(null);
+                }
+            }}
         >
             <SceneContent />
         </Canvas>
