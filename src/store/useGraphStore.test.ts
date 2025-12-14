@@ -6,7 +6,7 @@ describe('useGraphStore Undo/Redo', () => {
         useGraphStore.setState({
             nodes: [],
             selection: [],
-            options: { snap: false, glow: true, showNames: true, showSelectedLinesOnly: false }
+            options: { snap: false, glow: true, showNames: true, showSelectedLinesOnly: false, canvasMode: false }
         });
         useGraphStore.temporal.getState().clear();
     });
