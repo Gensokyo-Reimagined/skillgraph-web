@@ -41,6 +41,7 @@ interface GraphState {
         showNames: boolean;
         showSelectedLinesOnly: boolean;
         canvasMode: boolean;
+        canvasAxis: 'XZ' | 'XY';
     };
     pickingMode: {
         isActive: boolean;
@@ -71,6 +72,7 @@ interface GraphState {
     removeChange: (nodeId: string, index: number) => void;
 
     toggleOption: (key: keyof GraphState['options']) => void;
+    setCanvasAxis: (axis: 'XZ' | 'XY') => void;
     importGraph: (data: Record<string, any>) => void;
 
     focusTrigger: number;
@@ -95,6 +97,7 @@ export const useGraphStore = create<GraphState>()(
                     showNames: true,
                     showSelectedLinesOnly: false,
                     canvasMode: false,
+                    canvasAxis: 'XZ',
                 },
                 pickingMode: {
                     isActive: false,
@@ -238,6 +241,10 @@ export const useGraphStore = create<GraphState>()(
 
                 toggleOption: (key) => set((state) => ({
                     options: { ...state.options, [key]: !state.options[key] }
+                })),
+
+                setCanvasAxis: (axis) => set((state) => ({
+                    options: { ...state.options, canvasAxis: axis }
                 })),
 
                 importGraph: (data) => {

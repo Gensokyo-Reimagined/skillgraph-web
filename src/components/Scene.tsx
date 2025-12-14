@@ -153,25 +153,46 @@ const SceneContent: React.FC = () => {
             <ambientLight intensity={0.6} />
             <directionalLight position={[10, 20, 10]} intensity={0.8} />
 
-            <Grid infiniteGrid fadeDistance={50} sectionColor="#444" cellColor="#222" raycast={() => null} />
+            <Grid
+                infiniteGrid
+                fadeDistance={50}
+                sectionColor="#444"
+                cellColor="#222"
+                raycast={() => null}
+                rotation={options.canvasMode && options.canvasAxis === 'XY' ? [Math.PI / 2, 0, 0] : [0, 0, 0]}
+            />
 
             {options.canvasMode ? (
-                <OrthographicCamera makeDefault position={[0, 100, 0]} zoom={20} near={-200} far={200} />
+                options.canvasAxis === 'XY' ? (
+                    <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={20} near={-200} far={200} />
+                ) : (
+                    <OrthographicCamera makeDefault position={[0, 100, 0]} zoom={20} near={-200} far={200} />
+                )
             ) : (
                 <PerspectiveCamera makeDefault position={[10, 10, 10]} fov={75} />
             )}
 
             {options.canvasMode && (
-                <group position={[0, -1, 0]}>
-                    <Text position={[55, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} fontSize={4} color="#ef4444">+X</Text>
-                    <Text position={[-55, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} fontSize={4} color="#ef4444">-X</Text>
-                    <Text position={[0, 0, 55]} rotation={[-Math.PI / 2, 0, 0]} fontSize={4} color="#3b82f6">+Z</Text>
-                    <Text position={[0, 0, -55]} rotation={[-Math.PI / 2, 0, 0]} fontSize={4} color="#3b82f6">-Z</Text>
-                </group>
+                options.canvasAxis === 'XY' ? (
+                    <group position={[0, 0, -1]}>
+                        <Text position={[55, 0, 0]} fontSize={4} color="#ef4444">+X</Text>
+                        <Text position={[-55, 0, 0]} fontSize={4} color="#ef4444">-X</Text>
+                        <Text position={[0, 55, 0]} fontSize={4} color="#10b981">+Y</Text>
+                        <Text position={[0, -55, 0]} fontSize={4} color="#10b981">-Y</Text>
+                    </group>
+                ) : (
+                    <group position={[0, -1, 0]}>
+                        <Text position={[55, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} fontSize={4} color="#ef4444">+X</Text>
+                        <Text position={[-55, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} fontSize={4} color="#ef4444">-X</Text>
+                        <Text position={[0, 0, 55]} rotation={[-Math.PI / 2, 0, 0]} fontSize={4} color="#3b82f6">+Z</Text>
+                        <Text position={[0, 0, -55]} rotation={[-Math.PI / 2, 0, 0]} fontSize={4} color="#3b82f6">-Z</Text>
+                    </group>
+                )
             )}
 
             <OrbitControls
                 ref={orbitRef}
+                key={options.canvasMode ? `canvas-${options.canvasAxis || 'XZ'}` : '3d'}
                 makeDefault
                 enableRotate={!options.canvasMode}
                 mouseButtons={{

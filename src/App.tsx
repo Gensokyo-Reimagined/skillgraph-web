@@ -123,6 +123,16 @@ function App() {
             Canvas
           </button>
 
+          {options.canvasMode && (
+            <button
+              onClick={() => useGraphStore.getState().setCanvasAxis(options.canvasAxis === 'XZ' ? 'XY' : 'XZ')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors bg-gray-800 text-gray-400 hover:bg-gray-700"
+              title="Switch View Axis"
+            >
+              {options.canvasAxis}
+            </button>
+          )}
+
           <button
             onClick={() => useGraphStore.getState().triggerFocus()}
             className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-400 hover:text-white"

@@ -34,20 +34,43 @@ export const Node: React.FC<NodeData> = (props) => {
 
         // Flower/Fan-out Logic
         if (options.canvasMode && hoveredStack && !isDragging) {
+            const axis = options.canvasAxis || 'XZ';
+
             // Are we in the hovered stack?
-            if (Math.abs(hoveredStack.x - x) < 0.1 && Math.abs(hoveredStack.z - z) < 0.1) {
+            // Check based on axis
+            let isStack = false;
+            if (axis === 'XZ') {
+                isStack = Math.abs(hoveredStack.x - x) < 0.1 && Math.abs(hoveredStack.z - z) < 0.1;
+            } else {
+                isStack = Math.abs(hoveredStack.x - x) < 0.1 && Math.abs(hoveredStack.z - y) < 0.1;
+                // Note: hoveredStack stores (x, z) but we treat second coord as "vertical" axis in 2D.
+                // In XZ mode, vertical is Z. In XY mode, vertical is Y.
+                // Wait, hoveredStack is {x, z} typed.
+                // Let's reuse 'z' property of hoveredStack to mean "the second dimension".
+            }
+
+            if (isStack) {
                 // Yes. Calculate our offset.
                 const nodes = useGraphStore.getState().nodes;
-                const stack = nodes.filter(n => Math.abs(n.x - x) < 0.1 && Math.abs(n.z - z) < 0.1);
+                let stack = [];
+                if (axis === 'XZ') {
+                    stack = nodes.filter(n => Math.abs(n.x - x) < 0.1 && Math.abs(n.z - z) < 0.1);
+                } else {
+                    stack = nodes.filter(n => Math.abs(n.x - x) < 0.1 && Math.abs(n.y - y) < 0.1);
+                }
 
                 if (stack.length > 1) {
                     const index = stack.findIndex(n => n.id === id);
                     const angle = (index / stack.length) * Math.PI * 2;
                     const offsetR = radius * 3; // Flower radius
 
-                    targetX = x + Math.cos(angle) * offsetR;
-                    targetZ = z + Math.sin(angle) * offsetR;
-                    // Keep Y same
+                    if (axis === 'XZ') {
+                        targetX = x + Math.cos(angle) * offsetR;
+                        targetZ = z + Math.sin(angle) * offsetR;
+                    } else {
+                        targetX = x + Math.cos(angle) * offsetR;
+                        targetY = y + Math.sin(angle) * offsetR;
+                    }
                 }
             }
         }
@@ -134,10 +157,24 @@ export const Node: React.FC<NodeData> = (props) => {
                 }
 
                 // Check if we are part of a stack (>1 node at approx loc)
+                // Check if we are part of a stack (>1 node at approx loc)
                 const state = useGraphStore.getState();
-                const stack = state.nodes.filter(n => Math.abs(n.x - x) < 0.1 && Math.abs(n.z - z) < 0.1);
+                const axis = state.options.canvasAxis || 'XZ';
+
+                let stack = [];
+                if (axis === 'XZ') {
+                    stack = state.nodes.filter(n => Math.abs(n.x - x) < 0.1 && Math.abs(n.z - z) < 0.1);
+                } else {
+                    stack = state.nodes.filter(n => Math.abs(n.x - x) < 0.1 && Math.abs(n.y - y) < 0.1);
+                }
+
                 if (stack.length > 1) {
-                    state.setHoveredStack({ x, z });
+                    if (axis === 'XZ') {
+                        state.setHoveredStack({ x, z });
+                    } else {
+                        // We reuse 'z' property to store the 2nd dimension (Y)
+                        state.setHoveredStack({ x, z: y });
+                    }
                 }
             }}
             onPointerOut={() => {
