@@ -40,12 +40,17 @@ interface GraphState {
         glow: boolean;
         showNames: boolean;
         showSelectedLinesOnly: boolean;
+        canvasMode: boolean;
     };
     pickingMode: {
         isActive: boolean;
         type: 'requires' | 'orRequires' | 'conflicts' | null;
         sourceId: string | null;
     };
+
+    // Interaction State
+    isDragging: boolean;
+    hoveredStack: { x: number, z: number } | null;
 
     // Actions
     addNode: () => void;
@@ -73,6 +78,9 @@ interface GraphState {
 
     startPicking: (sourceId: string, type: 'requires' | 'orRequires' | 'conflicts') => void;
     stopPicking: () => void;
+
+    setIsDragging: (isDragging: boolean) => void;
+    setHoveredStack: (stack: { x: number, z: number } | null) => void;
 }
 
 export const useGraphStore = create<GraphState>()(
@@ -86,12 +94,16 @@ export const useGraphStore = create<GraphState>()(
                     glow: true,
                     showNames: true,
                     showSelectedLinesOnly: false,
+                    canvasMode: false,
                 },
                 pickingMode: {
                     isActive: false,
                     type: null,
                     sourceId: null
                 },
+
+                isDragging: false,
+                hoveredStack: null,
 
                 addNode: () => set((state) => {
                     const id = "node_" + Math.floor(Math.random() * 10000);
@@ -268,6 +280,9 @@ export const useGraphStore = create<GraphState>()(
                 stopPicking: () => set({
                     pickingMode: { isActive: false, sourceId: null, type: null }
                 }),
+
+                setIsDragging: (isDragging) => set({ isDragging }),
+                setHoveredStack: (hoveredStack) => set({ hoveredStack }),
             }),
             {
                 // Persist Options

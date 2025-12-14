@@ -117,6 +117,13 @@ function App() {
           </button>
 
           <button
+            onClick={() => toggleOption('canvasMode')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors ${options.canvasMode ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+          >
+            Canvas
+          </button>
+
+          <button
             onClick={() => useGraphStore.getState().triggerFocus()}
             className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded text-sm font-medium transition-colors text-gray-400 hover:text-white"
             title="Focus Selected Node (F)"

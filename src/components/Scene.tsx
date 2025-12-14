@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Grid, TransformControls } from '@react-three/drei';
+import { OrbitControls, Grid, TransformControls, OrthographicCamera, PerspectiveCamera, Text } from '@react-three/drei';
 import { useGraphStore, type NodeData } from '../store/useGraphStore';
 import { useStore } from 'zustand';
 import { nodeRefs } from '../store/nodeRefs';
@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
 const SceneContent: React.FC = () => {
-    const { nodes, selection, updateNode } = useGraphStore();
+    const { nodes, selection, updateNode, options, setIsDragging } = useGraphStore();
     // Subscribe to temporal store to get history updates
     const temporalState = useStore(useGraphStore.temporal) as any;
     const past = temporalState?.past || [];
@@ -155,11 +155,27 @@ const SceneContent: React.FC = () => {
 
             <Grid infiniteGrid fadeDistance={50} sectionColor="#444" cellColor="#222" raycast={() => null} />
 
+            {options.canvasMode ? (
+                <OrthographicCamera makeDefault position={[0, 100, 0]} zoom={20} near={-200} far={200} />
+            ) : (
+                <PerspectiveCamera makeDefault position={[10, 10, 10]} fov={75} />
+            )}
+
+            {options.canvasMode && (
+                <group position={[0, -1, 0]}>
+                    <Text position={[55, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} fontSize={4} color="#ef4444">+X</Text>
+                    <Text position={[-55, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} fontSize={4} color="#ef4444">-X</Text>
+                    <Text position={[0, 0, 55]} rotation={[-Math.PI / 2, 0, 0]} fontSize={4} color="#3b82f6">+Z</Text>
+                    <Text position={[0, 0, -55]} rotation={[-Math.PI / 2, 0, 0]} fontSize={4} color="#3b82f6">-Z</Text>
+                </group>
+            )}
+
             <OrbitControls
                 ref={orbitRef}
                 makeDefault
+                enableRotate={!options.canvasMode}
                 mouseButtons={{
-                    LEFT: THREE.MOUSE.ROTATE,
+                    LEFT: options.canvasMode ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE,
                     MIDDLE: THREE.MOUSE.DOLLY,
                     RIGHT: THREE.MOUSE.PAN
                 }}
@@ -211,22 +227,17 @@ const SceneContent: React.FC = () => {
                     translationSnap={useGraphStore.getState().options.snap ? 1 : null}
                     onMouseDown={() => {
                         if (orbitRef.current) orbitRef.current.enabled = false;
+                        setIsDragging(true);
                     }}
                     onChange={() => {
                         // Multi-selection drag logic
                         if (selection.length > 1 && selectedObj) {
-                            // We need to track delta, but TransformControls doesn't give it directly easily in this context without tracking previous state.
-                            // However, since we are in a controlled environment, we can just let the user drag the "primary" node (the last selected one usually or the one attached to controls)
-                            // and then we update the others in onMouseUp.
-                            // BUT, for visual feedback, we want them to move together.
-
-                            // Actually, a simpler way for visual feedback is to rely on the fact that we will update ALL positions on drag end.
-                            // For real-time visual feedback of multiple nodes moving, we would need to manually update the positions of other nodes based on the delta of the primary node.
-                            // Let's implement a simple delta tracker.
+                            // ...
                         }
                     }}
                     onMouseUp={() => {
                         if (orbitRef.current) orbitRef.current.enabled = true;
+                        setIsDragging(false);
 
                         if (selectedObj) {
                             // Calculate the new position of the primary node
@@ -265,14 +276,16 @@ const SceneContent: React.FC = () => {
 export const Scene: React.FC = () => {
     return (
         <Canvas
-            camera={{ position: [10, 10, 10], fov: 75 }}
+            // camera is controlled by SceneContent now
             className="w-full h-full bg-[#111]"
             onPointerMissed={() => {
                 const state = useGraphStore.getState();
-                // Only deselect if we are NOT in picking mode
+                // Clear selection
                 if (!state.pickingMode.isActive) {
                     state.selectNode(null);
                 }
+                // Always clear stack on background click
+                state.setHoveredStack(null);
             }}
         >
             <SceneContent />
