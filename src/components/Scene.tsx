@@ -258,7 +258,6 @@ const SceneContent: React.FC = () => {
                     }}
                     onMouseUp={() => {
                         if (orbitRef.current) orbitRef.current.enabled = true;
-                        setIsDragging(false);
 
                         if (selectedObj) {
                             // Calculate the new position of the primary node
@@ -286,6 +285,10 @@ const SceneContent: React.FC = () => {
                                 });
                             }
                         }
+
+                        // Delay clearing drag state slightly to allow store update to propagate?
+                        // Or just clear it after update.
+                        setIsDragging(false);
                     }}
                     mode="translate"
                 />

@@ -76,9 +76,13 @@ export const Node: React.FC<NodeData> = (props) => {
         }
 
         // Lerp
-        groupRef.current.position.x += (targetX - groupRef.current.position.x) * 0.2;
-        groupRef.current.position.y += (targetY - groupRef.current.position.y) * 0.2;
-        groupRef.current.position.z += (targetZ - groupRef.current.position.z) * 0.2;
+        // If we are being dragged, don't lerp! Let TransformControls handle it.
+        // We only lerp if we are NOT selected OR if we are selected but NOT dragging.
+        if (!isSelected || !isDragging) {
+            groupRef.current.position.x += (targetX - groupRef.current.position.x) * 0.2;
+            groupRef.current.position.y += (targetY - groupRef.current.position.y) * 0.2;
+            groupRef.current.position.z += (targetZ - groupRef.current.position.z) * 0.2;
+        }
     });
 
     // Register ref and force position sync (initial only, let useFrame handle updates)
