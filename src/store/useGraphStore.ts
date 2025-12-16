@@ -58,6 +58,7 @@ interface GraphState {
     addNode: () => void;
     addNodes: (nodes: NodeData[]) => void;
     updateNode: (id: string, data: Partial<NodeData>) => void;
+    batchUpdateNodes: (ids: string[], data: Partial<NodeData>) => void;
     updateNodeId: (oldId: string, newId: string) => boolean;
     removeNode: (id: string) => void;
 
@@ -141,6 +142,14 @@ export const useGraphStore = create<GraphState>()(
                     set((state) => ({
                         nodes: state.nodes.map((node) =>
                             node.id === id ? { ...node, ...data } : node
+                        )
+                    }));
+                },
+
+                batchUpdateNodes: (ids, data) => {
+                    set((state) => ({
+                        nodes: state.nodes.map((node) =>
+                            ids.includes(node.id) ? { ...node, ...data } : node
                         )
                     }));
                 },

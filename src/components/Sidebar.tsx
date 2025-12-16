@@ -9,13 +9,15 @@ const BufferedInput = ({
     onChange,
     type = "text",
     className = "",
-    step
+    step,
+    placeholder
 }: {
     value: string | number,
     onChange: (val: string) => void,
     type?: string,
     className?: string,
-    step?: string
+    step?: string,
+    placeholder?: string
 }) => {
     const [localValue, setLocalValue] = useState(value);
 
@@ -44,6 +46,7 @@ const BufferedInput = ({
             onBlur={handleCommit}
             onKeyDown={handleKeyDown}
             className={className}
+            placeholder={placeholder}
         />
     );
 };
@@ -96,6 +99,7 @@ export const Sidebar: React.FC = () => {
         nodes,
         selection,
         updateNode,
+        batchUpdateNodes,
         updateNodeId,
         removeNode,
         addRelationship,
@@ -167,8 +171,40 @@ export const Sidebar: React.FC = () => {
                         </button>
                     </div>
 
-                    <div className="text-xs text-gray-500">
-                        Bulk property editing is not yet supported.
+                    <div className="bg-gray-800 p-4 rounded border border-gray-700 mb-4">
+                        <p className="text-sm text-gray-300 mb-2">Bulk Change Position</p>
+                        <div className="grid grid-cols-3 gap-2 mb-4">
+                            {['x', 'y', 'z'].map((axis) => {
+                                // Calculate common value
+                                const values = selection.map(id => {
+                                    const n = nodes.find(node => node.id === id);
+                                    return n ? (n as any)[axis] : 0;
+                                });
+                                const allSame = values.every(v => v === values[0]);
+                                const commonValue = allSame ? values[0] : '';
+                                const placeholder = allSame ? '' : 'Mixed';
+
+                                return (
+                                    <div key={axis}>
+                                        <label className="block text-xs text-gray-400 mb-1">{axis.toUpperCase()}</label>
+                                        <BufferedInput
+                                            type="number"
+                                            step="0.5"
+                                            value={commonValue}
+                                            onChange={(val) => {
+                                                const num = parseFloat(val);
+                                                if (!isNaN(num)) {
+                                                    batchUpdateNodes(selection, { [axis]: num });
+                                                }
+                                            }}
+                                            className="w-full bg-[#2a2a2a] border border-[#444] text-white p-2 rounded text-sm focus:outline-none focus:border-indigo-500 placeholder-gray-500"
+                                            placeholder={placeholder}
+                                        />
+                                        {!allSame && <div className="text-[10px] text-gray-500 text-center mt-1">Mixed</div>}
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             );
