@@ -52,4 +52,21 @@ describe('useGraphStore Undo/Redo', () => {
         useGraphStore.temporal.getState().undo();
         expect(useGraphStore.getState().nodes[0].x).toBe(0);
     });
+
+    it('should handle description field', () => {
+        const { addNode, updateNode } = useGraphStore.getState();
+        addNode();
+        const nodeId = useGraphStore.getState().nodes[0].id;
+
+        // Check default description
+        expect(useGraphStore.getState().nodes[0].description).toBe("");
+
+        // Update description
+        updateNode(nodeId, { description: "Test Description" });
+        expect(useGraphStore.getState().nodes[0].description).toBe("Test Description");
+
+        // Verify it persists in export
+        const state = useGraphStore.getState();
+        expect(state.nodes[0].description).toBe("Test Description");
+    });
 });

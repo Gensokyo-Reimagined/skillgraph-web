@@ -17,6 +17,7 @@ export interface ChangeData {
 export interface NodeData {
     id: string;
     displayName: string;
+    description: string;
     x: number;
     y: number;
     z: number;
@@ -114,6 +115,7 @@ export const useGraphStore = create<GraphState>()(
                         nodes: [...state.nodes, {
                             id,
                             displayName: "New Skill",
+                            description: "",
                             x: 0, y: 2, z: 0,
                             cost: 1,
                             radius: 0.5,
@@ -254,6 +256,7 @@ export const useGraphStore = create<GraphState>()(
                         newNodes.push({
                             id: id,
                             displayName: d.displayName || id,
+                            description: d.description || "",
                             x: d.x || 0,
                             y: d.y || 0,
                             z: d.z || 0,

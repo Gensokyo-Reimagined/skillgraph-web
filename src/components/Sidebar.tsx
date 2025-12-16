@@ -201,6 +201,16 @@ export const Sidebar: React.FC = () => {
                     />
                 </div>
 
+                <div className="mb-4">
+                    <label className="block text-xs text-gray-400 mb-1">Description (Internal)</label>
+                    <textarea
+                        value={selectedNode.description || ""}
+                        onChange={(e) => updateNode(selectedNode.id, { description: e.target.value })}
+                        className="w-full bg-[#2a2a2a] border border-[#444] text-white p-2 rounded text-sm focus:outline-none focus:border-indigo-500 h-20 resize-none font-sans"
+                        placeholder="Enter description..."
+                    />
+                </div>
+
                 <div className="grid grid-cols-2 gap-2 mb-4">
                     <div>
                         <label className="block text-xs text-gray-400 mb-1">Cost</label>
